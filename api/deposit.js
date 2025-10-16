@@ -1,25 +1,19 @@
-import { getUser, saveUser, getGlobalStats, saveGlobalStats } from '../utils/database.js';
+import express from "express";
+import { getDb } from "../utils/database.js";
+const router = express.Router();
 
-export default async function handler(req, res) {
-  if(req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
-  const { telegramId, amount } = req.body;
+router.post("/", async (req, res) => {
+  const { userId, amount } = req.body;
+  if (amount < 100) return res.status(400).json({ error: "Minimum deposit is 100" });
 
-  const user = await getUser(telegramId);
-  if(!user) return res.status(404).json({ error: "User not found" });
+  const db = getDb();
+  await db.collection("users").updateOne(
+    { userId },
+    { $inc: { balance: amount, locked: amount } },
+    { upsert: true }
+  );
 
-  const globalStats = getGlobalStats();
-  const blockedAmount = amount * 0.9;
-  const playableAmount = amount * 0.1;
+  res.json({ success: true });
+});
 
-  user.playable_balance += playableAmount;
-  user.blocked_balance += blockedAmount;
-  user.bonus_balance += amount * 0.05;
-
-  globalStats.total_deposits_today += amount;
-  globalStats.owner_earnings_target = globalStats.total_deposits_today * 0.5;
-
-  await saveUser(user);
-  saveGlobalStats(globalStats);
-
-  res.status(200).json({ success: true, balances: user });
-}
+export default router;

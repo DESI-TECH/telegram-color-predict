@@ -1,3 +1,53 @@
-body { margin:0; padding:0; background:#111; color:#fff; font-family:'Poppins', sans-serif; text-align:center; }
-h1 { color:#00ff99; margin-top:40px; }
-button { margin:10px; padding:12px 24px; border:none; border-radius:8px; background-color:#00ff99; color:#111; font-weight:bold; cursor:pointer; }
+body {
+  font-family: Arial, sans-serif;
+  background: #f2f2f2;
+  margin: 0;
+  padding: 20px;
+}
+
+.container {
+  max-width: 900px;
+  margin: auto;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+h1, h2 {
+  text-align: center;
+}
+
+.wallet-section, .bet-section, .timer-section, .recent-bets, #owner-section {
+  margin: 20px 0;
+}
+
+.color-btn {
+  padding: 10px 20px;
+  margin: 5px;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#bet-amount {
+  padding: 5px;
+  width: 100px;
+  margin-right: 10px;
+}
+
+button {
+  padding: 7px 15px;
+  cursor: pointer;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+table th, table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}

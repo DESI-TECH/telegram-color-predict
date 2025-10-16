@@ -1,15 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Color Prediction Game</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Color Predict Game</title>
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
-  <h1>🎮 Color Prediction Game</h1>
-  <div id="game"></div>
-  <script src="app.js"></script>
+  <div class="container">
+    <h1>🎨 Color Predict Game</h1>
+    <div class="wallet-section">
+      <h3>Wallet Balance: <span id="balance">0</span></h3>
+      <button id="deposit-btn">Deposit</button>
+      <button id="owner-dashboard-btn" style="display:none;">Owner Dashboard</button>
+    </div>
+
+    <div class="bet-section">
+      <h3>Select Color:</h3>
+      <div id="color-buttons">
+        <button class="color-btn" data-color="red">Red</button>
+        <button class="color-btn" data-color="green">Green</button>
+        <button class="color-btn" data-color="gradient">Gradient</button>
+      </div>
+
+      <h3>Select Amount:</h3>
+      <div id="amount-buttons">
+        <button class="amount-btn" data-amount="10">10</button>
+        <button class="amount-btn" data-amount="50">50</button>
+        <button class="amount-btn" data-amount="100">100</button>
+      </div>
+
+      <button id="place-bet-btn" disabled>Place Bet</button>
+    </div>
+
+    <div class="history-section">
+      <h3>Recent Bets</h3>
+      <ul id="bet-history"></ul>
+    </div>
+
+    <div class="timer-section">
+      <h3>Next Round In: <span id="timer">00:30</span></h3>
+    </div>
+  </div>
+
+  <script src="app.js" type="module"></script>
 </body>
 </html>

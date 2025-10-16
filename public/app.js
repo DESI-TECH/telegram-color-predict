@@ -1,94 +1,105 @@
-import { getUser, saveUser, getGlobalStats, saveGlobalStats } from '../utils/database.js';
-import { demoOutcome, realOutcome } from '../utils/random.js';
-import { convertAmount, formatCurrency } from '../utils/currency.js';
+const API_URL = "/api"; // Vercel deployment will route properly
 
-let mode = "demo"; // "demo" or "real"
-let demoBalance = 5000;
-let timer = 10;
+let selectedColor = null;
+let selectedAmount = null;
+let balance = 0;
+let isOwner = false; // Set true if userId === OWNER_ID
 
-// Simulated user country (replace with actual detection)
-let userCountry = window.USER_COUNTRY || "IN"; // e.g., "IN", "US", "NP"
+const balanceEl = document.getElementById("balance");
+const ownerDashboardBtn = document.getElementById("owner-dashboard-btn");
+const placeBetBtn = document.getElementById("place-bet-btn");
+const betHistoryEl = document.getElementById("bet-history");
+const timerEl = document.getElementById("timer");
 
-// Elements
-const balanceEl = document.getElementById('balance');
-const timerEl = document.getElementById('timer');
-const resultEl = document.getElementById('result');
-
-// Format balance for display
-function displayBalance(amount) {
-  const converted = convertAmount(amount, userCountry);
-  return formatCurrency(converted, userCountry);
-}
-
-// Update balance display
-async function updateBalance() {
-  if (mode === "demo") {
-    balanceEl.innerText = `Balance: ${displayBalance(demoBalance)} (Demo)`;
-  } else {
-    const user = await getUser(window.USER_TELEGRAM_ID);
-    balanceEl.innerText = `Balance: ${displayBalance(user.playable_balance)}`;
-  }
-}
-
-// Timer countdown
-setInterval(() => {
-  timer--;
-  if (timer <= 0) {
-    timer = 10;
-    resultEl.innerText = "Time's up! Make your choice.";
-  }
-  timerEl.innerText = `Time: ${timer}s`;
-}, 1000);
-
-// Play function
-async function play(chosenColor) {
-  let outcome, payout;
-
-  if (mode === "demo") {
-    outcome = demoOutcome(chosenColor); // 80% win
-    payout = outcome === chosenColor ? 100 : -50;
-    demoBalance += payout;
-    resultEl.innerText = `You chose ${chosenColor}, outcome: ${outcome}, payout: ${displayBalance(payout)}`;
-    updateBalance();
-  } else {
-    const user = await getUser(window.USER_TELEGRAM_ID);
-    if (user.playable_balance < 10) {
-      resultEl.innerText = "Insufficient balance!";
-      return;
-    }
-
-    // Controlled outcome based on house edge
-    const stats = getGlobalStats();
-    const ownerTarget = stats.owner_earnings_target || 0.5; // 50% default
-    const winProb = 1 - ownerTarget; // User chance to win
-
-    outcome = realOutcome(chosenColor, winProb);
-
-    // Payout calculation
-    if (chosenColor === "gradient") {
-      payout = outcome === chosenColor ? 40 : -10;
-    } else {
-      payout = outcome === chosenColor ? 18 : -10;
-    }
-
-    // Update user balances
-    user.playable_balance += payout - 10; // deduct bet
-    await saveUser(user);
-
-    // Update global stats
-    stats.total_bets_today += 10;
-    stats.current_owner_earnings += outcome === chosenColor ? -payout + 10 : 10;
-    saveGlobalStats(stats);
-
-    resultEl.innerText = `You chose ${chosenColor}, outcome: ${outcome}, payout: ${displayBalance(payout)}`;
-    updateBalance();
-  }
-}
-
-// Attach buttons
-document.querySelectorAll('#colors button').forEach(btn => {
-  btn.addEventListener('click', () => play(btn.className));
+// Color selection
+document.querySelectorAll(".color-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    selectedColor = btn.dataset.color;
+    checkBetReady();
+  });
 });
 
-// Initialize display
-updateBalance();
+// Amount selection
+document.querySelectorAll(".amount-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    selectedAmount = parseInt(btn.dataset.amount);
+    checkBetReady();
+  });
+});
+
+// Enable place bet if color & amount selected
+function checkBetReady() {
+  placeBetBtn.disabled = !(selectedColor && selectedAmount);
+}
+
+// Place Bet
+placeBetBtn.addEventListener("click", async () => {
+  if (!selectedColor || !selectedAmount) return;
+  try {
+    const res = await fetch(`${API_URL}/round`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId: localStorage.getItem("userId") || Math.floor(Math.random()*1000000),
+        color: selectedColor,
+        amount: selectedAmount
+      })
+    });
+    const data = await res.json();
+    if (data.error) {
+      alert("Error: " + data.error);
+    } else {
+      balance += data.amountWonLoss; // update for demo; real value comes from API
+      updateBalance();
+      addBetHistory(data.result, selectedColor, selectedAmount, data.amountWonLoss);
+    }
+  } catch(e) {
+    console.error(e);
+  }
+  // Reset selections
+  selectedColor = null;
+  selectedAmount = null;
+  placeBetBtn.disabled = true;
+});
+
+// Update balance
+function updateBalance() {
+  balanceEl.innerText = balance;
+}
+
+// Add to bet history
+function addBetHistory(result, color, amount, wonLoss) {
+  const li = document.createElement("li");
+  li.innerText = `${result} | Color: ${color} | Bet: ${amount} | Won/Loss: ${wonLoss}`;
+  betHistoryEl.prepend(li);
+}
+
+// Owner dashboard button
+if (isOwner) ownerDashboardBtn.style.display = "inline-block";
+
+// Round timer
+let countdown = 30;
+setInterval(() => {
+  countdown--;
+  if (countdown < 0) countdown = 30;
+  const minutes = Math.floor(countdown/60).toString().padStart(2,"0");
+  const seconds = (countdown%60).toString().padStart(2,"0");
+  timerEl.innerText = `${minutes}:${seconds}`;
+}, 1000);
+
+// Initial fetch wallet & history
+async function fetchWallet() {
+  const userId = localStorage.getItem("userId") || Math.floor(Math.random()*1000000);
+  localStorage.setItem("userId", userId);
+  try {
+    const res = await fetch(`${API_URL}/balance?userId=${userId}`);
+    const data = await res.json();
+    balance = data.balance || 0;
+    updateBalance();
+  } catch(e) {
+    console.error(e);
+  }
+}
+
+fetchWallet();
+
