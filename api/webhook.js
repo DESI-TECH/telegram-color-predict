@@ -1,29 +1,17 @@
-import express from "express";
-import axios from "axios";
+const express = require("express");
+const bodyParser = require("body-parser");
+const TelegramBot = require("node-telegram-bot-api");
 
-const router = express.Router();
+const token = process.env.TG_BOT_TOKEN;
+const bot = new TelegramBot(token);
+bot.setWebHook(`${process.env.VERCEL_URL}/api/webhook`);
 
-router.post("/", async (req, res) => {
-  const update = req.body;
+const app = express();
+app.use(bodyParser.json());
 
-  if (!update.message) return res.sendStatus(200);
-
-  const chatId = update.message.chat.id;
-  const text = update.message.text;
-
-  if (text === "/start") {
-    await axios.post(`https://api.telegram.org/bot${process.env.BOT_TOKEN}/sendMessage`, {
-      chat_id: chatId,
-      text: "🎮 Welcome to Color Prediction Game! Click below to start.",
-      reply_markup: {
-        inline_keyboard: [
-          [{ text: "▶️ Open Game", web_app: { url: "https://your-vercel-app.vercel.app" } }]
-        ]
-      }
-    });
-  }
-
-  res.sendStatus(200);
+app.post("/api/webhook", (req, res) => {
+    bot.processUpdate(req.body);
+    res.sendStatus(200);
 });
 
-export default router;
+app.listen(3000, () => console.log("Webhook server is running"));
