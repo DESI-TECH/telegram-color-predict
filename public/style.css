@@ -1,0 +1,103 @@
+/* General page setup */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f7f9fc;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+}
+
+/* Container card for the game */
+.game-container {
+    background: #ffffff;
+    width: 95%;
+    max-width: 400px;
+    margin-top: 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    padding: 30px 20px;
+    text-align: center;
+}
+
+/* Heading */
+.game-container h1 {
+    font-size: 26px;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+/* Balance display */
+#balance {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #222;
+}
+
+/* Timer display */
+#timer {
+    font-size: 18px;
+    margin-bottom: 20px;
+    color: #555;
+}
+
+/* Buttons container */
+#colors {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+/* Color buttons */
+#colors button {
+    padding: 15px 0;
+    font-size: 18px;
+    font-weight: bold;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #fff;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+/* Individual colors */
+#colors button.red { background-color: #e74c3c; }
+#colors button.green { background-color: #2ecc71; }
+#colors button.gradient {
+    background: linear-gradient(45deg, #e74c3c, #2ecc71);
+}
+
+/* Hover effect */
+#colors button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    opacity: 0.95;
+}
+
+/* Result display */
+#result {
+    font-size: 18px;
+    font-weight: 500;
+    color: #333;
+    margin-top: 15px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+    .game-container {
+        padding: 20px 15px;
+        border-radius: 15px;
+    }
+    #colors button {
+        font-size: 16px;
+        padding: 12px 0;
+    }
+    .game-container h1 {
+        font-size: 22px;
+    }
+}
